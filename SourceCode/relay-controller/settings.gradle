@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Relay"
-include ':app', ':vioserial'
+include ':app', ':hyyRelay'

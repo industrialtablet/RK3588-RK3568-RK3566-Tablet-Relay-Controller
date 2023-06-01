@@ -83,67 +83,28 @@ public class RelayService extends Service {
     }
 
     private void intTtyUSB0() {
-        Log.d("owenstar", "RelayService::intTtyUSB0");
-        String ck = "/dev/ttyUSB0";
-        int btl = 115200;
-        if (!isOpenSerial) {
-            // 【第1步：打开串口 Open serial port 】
-            int openStatus = NormalSerial.instance().open(ck, btl);
-            if (openStatus == 0) {
-                // success
-                Intent intent = new Intent();
-                intent.setAction("com.szhyy.broadcaster.USB_STATE");
-                intent.putExtra("connect", "success");
-                sendBroadcast(intent);
-                Log.d("owenstar", "open "+ck+" "+ btl+" success");
 
-            } else {
-                // fialed
-                Intent intent = new Intent();
-                intent.setAction("com.szhyy.broadcaster.USB_STATE");
-                intent.putExtra("connect", "failed");
-                sendBroadcast(intent);
-                Log.d("owenstar", "open "+ck+" "+ btl+" failed");
+        HyyRelayCtl hyyRelayCtl = HyyRelayCtl.instance();
+        boolean opened = hyyRelayCtl.open(new HyyRelay.RelayInputState() {
+            @Override
+            public void on() {
+                hyyRelayCtl.relayOn();
             }
-            //【添加数据接收回调 Add data receive callback】
-            NormalSerial.instance().addDataListener(hexData -> {
-                //Log.d("owenstar", "data back " + hexData);
-                if(!TextUtils.isEmpty(hexData)){
-                    int len = hexData.length();
-                    String command = hexData.substring(len-8, len);
-                    ConfigEntity configEntity = ConfigPrefUtils.getInstance(this).getConfig(command);
 
-                    String input ="";
-                    switch (command){
-                        case "A10101A3": {   // A10101A3 打开开关
-                            if(configEntity!=null) {
-                                Log.d("owenstar", configEntity.toString());
-                                Intent intent = new Intent(getApplicationContext(), InnerWebViewActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
-                                intent.putExtra("url", configEntity.getValue());
-                                startActivity(intent);
-                            }
-                            // send ...
-                            input = "A00103A4";
-                            break;
-                        }
-                        case "A10100A2": {  // A10100A2 关闭开关
-                            if(configEntity!=null) {
-                                String packageName = configEntity.getValue();
-                                launchApp(packageName);
-                            }
-                            //send ..
-                            input = "A00102A3";
-                            break;
-                        }
-                    }
-                    NormalSerial.instance().sendHex(input);
-                    Log.d("owenstar", "command " + command);
-                }
-            });
+            @Override
+            public void off() {
+                hyyRelayCtl.relayOff();
+            }
+        });
+
+        Intent intent = new Intent();
+        intent.setAction("com.szhyy.broadcaster.USB_STATE");
+        if(opened){
+            intent.putExtra("connect", "success");
         } else {
-            NormalSerial.instance().close();
+            intent.putExtra("connect", "failed");
         }
+        sendBroadcast(intent);
     }
 
     public void launchApp(String packageName) {
@@ -174,7 +135,7 @@ public class RelayService extends Service {
 
     @Override
     public void onDestroy() {
-        NormalSerial.instance().close();
+        HyyRelayCtl.instance().close();
         stopForeground(true);
         Intent intent = new Intent(this, BootstrapReceiver.class);
         intent.setAction("com.szhyy.relay.RELAY_SERVICE_DESTROY");

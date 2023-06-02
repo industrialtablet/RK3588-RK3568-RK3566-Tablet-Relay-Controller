@@ -77,12 +77,20 @@ public class HyyRelayCtl implements HyyRelay {
 
     @Override
     public boolean mosOn() {
-        return false;
+        if(!NormalSerial.instance().isOpen()) {
+            return false;
+        }
+        executor.submit(()-> NormalSerial.instance().sendHex("A00203A4"));
+        return true;
     }
 
     @Override
     public boolean mosOff() {
-        return false;
+        if(!NormalSerial.instance().isOpen()) {
+            return false;
+        }
+        executor.submit(()-> NormalSerial.instance().sendHex("A00202A3"));
+        return true;
     }
 
     @Override

@@ -44,7 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private RecyclerView rvConfigs;
 
@@ -55,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
     private List<ConfigEntity> configEntityList = null;
 
     private ConfigPrefUtils configPrefUtils;
+
+    private Button btnRelayOn,btnRelayOff,btnMoseOn,btnMoseOff;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -127,6 +129,18 @@ public class MainActivity extends AppCompatActivity {
         configEntityList = configPrefUtils.listConfig();
         btnAddConfig = findViewById(R.id.btn_add_config);
         btnRemoveConfig = findViewById(R.id.btn_delete_config);
+
+        btnRelayOn = findViewById(R.id.btn_relay_on);
+        btnRelayOff = findViewById(R.id.btn_relay_off);
+        btnMoseOn=findViewById(R.id.btn_mos_on);
+        btnMoseOff=findViewById(R.id.btn_mos_off);
+
+        btnRelayOn.setOnClickListener(this);
+        btnRelayOff.setOnClickListener(this);
+        btnMoseOn.setOnClickListener(this);
+        btnMoseOff.setOnClickListener(this);
+        intTtyUSB0();
+
         btnRemoveConfig.setOnClickListener((v)->{
             List<ConfigEntity> checkList = getCheckConfigList();
             if(checkList.size()==0){
@@ -177,6 +191,55 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        HyyRelayCtl.instance().close();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_relay_on:
+                HyyRelayCtl.instance().relayOn();
+                break;
+            case R.id.btn_relay_off:
+                HyyRelayCtl.instance().relayOff();
+                break;
+            case R.id.btn_mos_on:
+                HyyRelayCtl.instance().mosOn();
+                break;
+            case R.id.btn_mos_off:
+                HyyRelayCtl.instance().mosOff();
+                break;
+        }
+    }
+
+    private void intTtyUSB0() {
+
+        HyyRelayCtl hyyRelayCtl = HyyRelayCtl.instance();
+        boolean opened = hyyRelayCtl.open(new HyyRelay.RelayInputState() {
+            @Override
+            public void on() {
+                hyyRelayCtl.relayOn();
+            }
+
+            @Override
+            public void off() {
+                hyyRelayCtl.relayOff();
+            }
+        });
+
+        Intent intent = new Intent();
+        intent.setAction("com.szhyy.broadcaster.USB_STATE");
+        if(opened){
+            intent.putExtra("connect", "success");
+        } else {
+            intent.putExtra("connect", "failed");
+        }
+        sendBroadcast(intent);
     }
 
     private class ConfigRVAdapter extends RecyclerView.Adapter<ConfigVH> {

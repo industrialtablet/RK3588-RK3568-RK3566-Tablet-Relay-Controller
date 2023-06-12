@@ -23,7 +23,7 @@ public class HyyRelayCtl implements HyyRelay {
     }
 
     @Override
-    public boolean open(RelayInputState relayInputState) {
+    public boolean open(RelaySwitchingEventListener relayInputState) {
         String ck = "/dev/ttyUSB0";
         int btl = 115200;
         if (!isOpenSerial) {

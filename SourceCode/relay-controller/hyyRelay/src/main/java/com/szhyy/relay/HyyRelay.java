@@ -2,16 +2,19 @@ package com.szhyy.relay;
 
 public interface HyyRelay {
 
-    interface RelayInputState {
+    /**
+     * 开关开关事件回调监听。 on - 开关按下事件。 off - 开关放开事件
+     */
+    interface RelaySwitchingEventListener {
         void on();
         void off();
     }
     /**
-     * 打开设备
+     * 打开串口，连接串口设备
      * @param relayInputState 输入开关状态回调接口。 on函数监听开，off开关监听关
      * @return true-打开成功，false-打开失败
      */
-    boolean open(RelayInputState relayInputState);
+    boolean open(RelaySwitchingEventListener relayInputState);
 
     /**
      * 打开继电器，
@@ -42,5 +45,4 @@ public interface HyyRelay {
      * @return true-关闭成功，false-关闭失败
      */
     boolean close();
-
 }

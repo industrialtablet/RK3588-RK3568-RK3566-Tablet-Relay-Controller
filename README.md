@@ -48,6 +48,46 @@ Please note that the specific steps and required hardware and software may vary 
 
 -[Build new ubuntu rootfs for RK3566 RK3568 RK3588 products](https://github.com/industrialtablet/Re-build-ubuntu20.04-rootfs-for-RK3566-RK3568-RK3588)
 
+# API
+
+The interface class  HyyRelay defines how to control the function of the relay switch through the switch.
+
+ HyyRelay interface class methods 
+
+| method   | parameter                   | describe                                           |
+| -------- | --------------------------- | -------------------------------------------------- |
+| open     | RelaySwitchingEventListener | Open the serial port and connect the serial device |
+| relayOn  | none                        | Open relay                                         |
+| relayOff | none                        | Close relay                                        |
+| close    | none                        | close serial port                                  |
+
+RelaySwitchingEventListener:  Switch The switch event callback is monitored.  When the switch is pressed, the on method is called. The development is released and the off method is called
+
+example:
+
+```java
+  HyyRelayCtl hyyRelayCtl = HyyRelayCtl.instance();
+  boolean opened = hyyRelayCtl.open(new HyyRelay.RelaySwitchingEventListener() {
+      @Override
+      public void on() {
+          hyyRelayCtl.relayOn() //  open the relay switch here
+          // more code implement your functions here.
+      }
+
+      @Override 
+      public void off() {
+          hyyRelayCtl.relayOff(); //  close the relay switch here
+          // more code implement your functions here.
+      }
+  });
+
+// HyyRelayCtl implements interface HyyRelay
+// hyyRelayCtl.open return true Indicates that the serial port device is successfully connected. Otherwise, the connection fails
+// If the device switch button is pressed, RelaySwitchingEventListener on method will callback. Call the code to open the switch here, and you can implement your own functions
+```
+
+
+
 
 
 # Contacts

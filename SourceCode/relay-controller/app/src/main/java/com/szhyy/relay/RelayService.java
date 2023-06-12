@@ -14,19 +14,14 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.IBinder;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.vi.vioserial.NormalSerial;
-
 import java.util.Collections;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class RelayService extends Service {
 
@@ -85,7 +80,7 @@ public class RelayService extends Service {
     private void intTtyUSB0() {
 
         HyyRelayCtl hyyRelayCtl = HyyRelayCtl.instance();
-        boolean opened = hyyRelayCtl.open(new HyyRelay.RelayInputState() {
+        boolean opened = hyyRelayCtl.open(new HyyRelay.RelaySwitchingEventListener() {
             @Override
             public void on() {
                 hyyRelayCtl.relayOn();
